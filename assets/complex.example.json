@@ -2,6 +2,8 @@
   "receptor": "proteina.pdb",
   "title": "Mi proteina - complejos proteina-ligando",
   "subtitle": "",
+  "site_residues": [],
+  "site_label": "la cavidad 1",
   "highlight_residues": [],
   "highlight_label": "residuos destacados",
   "outfile": "FIGURA_complejos.png",

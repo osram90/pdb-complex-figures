@@ -20,6 +20,8 @@ def load_config(path="complex.json"):
     for key in ("receptor", "ligands"):
         if key not in cfg:
             sys.exit(f"Falta la clave obligatoria '{key}' en {path}.")
+    cfg.setdefault("site_residues", [])
+    cfg.setdefault("site_label", "el sitio")
     cfg.setdefault("highlight_residues", [])
     cfg.setdefault("highlight_label", "residuos destacados")
     cfg.setdefault("title", "Complejos proteina-ligando")

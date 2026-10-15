@@ -1,6 +1,6 @@
 ---
 name: pdb-complex-figures
-description: Genera figuras de complejos proteína-ligando con calidad de publicación a partir de archivos PDB/PDBQT — superficie molecular completa más un detalle del sitio de unión con los puentes de hidrógeno acotados, al estilo de las figuras de artículos científicos. Úsala siempre que el usuario mencione figuras de acoplamiento molecular o docking, poses de AutoDock Vina, complejos proteína-ligando, visualizar un sitio de unión o un bolsillo, interacciones ligando-receptor, mapas de contactos, archivos .pdbqt o _out.pdbqt, o pida "una figura como la del paper" de una estructura; también cuando pida figuras tipo PyMOL o ChimeraX de un complejo, aunque no nombre ninguna de esas herramientas.
+description: Genera figuras y tablas de complejos proteína-ligando con calidad de publicación a partir de archivos PDB/PDBQT — superficie molecular completa más un detalle del sitio de unión con los puentes de hidrógeno acotados, y las tablas de resultados y de contactos en Markdown, CSV y HTML. Úsala siempre que el usuario mencione figuras de acoplamiento molecular o docking, poses de AutoDock Vina, complejos proteína-ligando, visualizar un sitio de unión o un bolsillo, interacciones ligando-receptor, mapas de contactos, archivos .pdbqt o _out.pdbqt, o pida "una figura como la del paper" de una estructura, o la tabla de contactos o de afinidades de un acoplamiento; también cuando pida figuras tipo PyMOL o ChimeraX de un complejo, aunque no nombre ninguna de esas herramientas.
 ---
 
 # Figuras de complejos proteína-ligando
@@ -16,7 +16,11 @@ acoplamiento molecular:
   se une.
 
 Ambos paneles van unidos por un círculo y dos líneas guía, con la afinidad destacada y,
-si hay varias poses, una barra por pose.
+si hay varias poses, una barra por pose. Se entregan las dos versiones: **la figura
+conjunta** con todos los ligandos y **una figura individual por compuesto**.
+
+Además genera las **tablas de resultados** a partir de los mismos datos que la figura —
+de modo que no puedan contradecirla— en Markdown, CSV y HTML.
 
 El renderizado usa **3Dmol.js en el navegador**, no PyMOL. Esta decisión es deliberada:
 `pymol-open-source` falla al importarse en muchos equipos Windows (error de carga de DLL)
@@ -79,6 +83,8 @@ el resto tiene valores por omisión razonables.
 | `ligands[].color` | Color del ligando; si se omite, se asigna uno de una paleta |
 | `ligands[].label` | Nombre a mostrar; útil para acentos y griegas |
 | `ligands[].score` | Afinidad; si la pose viene de Vina se lee sola del archivo |
+| `site_residues` | Residuos que delimitan la cavidad (de CB-Dock2 u otro análisis). Si se indican, la figura y las tablas informan cuántos contactos caen dentro |
+| `site_label` | Cómo nombrar esa región: «la cavidad 1», «el sitio activo»… |
 | `highlight_residues` | Números de residuo a pintar en rojo (sitio catalítico, mutaciones…) |
 | `model` | Qué pose usar del multi-MODEL. Por omisión 1, la de mejor afinidad |
 | `hbond_max`, `hydrophobic_max` | Umbrales en Å (3.5 y 4.5 por omisión) |
@@ -120,7 +126,21 @@ Es un criterio **solo de distancia**: no comprueba el ángulo donador–H–acep
 usuario va a publicar el recuento, conviene decírselo — es una estimación razonable del
 patrón de interacción, no una medida definitiva.
 
-### 3. Construir las escenas
+### 3. Generar las tablas
+
+```bash
+python make_tables.py
+```
+
+Solo necesita `contacts.json`, así que puede ejecutarse en cuanto termine el paso
+anterior, sin esperar a las figuras. Produce la tabla de resumen (una fila por ligando:
+afinidad, contactos, contactos dentro de la cavidad, puentes de hidrógeno e interacción
+con los residuos destacados) y una tabla de contactos por ligando.
+
+Cada tabla se escribe en tres formatos porque el destino cambia: `.md` para el
+manuscrito, `.csv` para Excel y `.html` para pegar en Word conservando el formato.
+
+### 4. Construir las escenas
 
 ```bash
 python build_views.py
@@ -130,7 +150,7 @@ Genera `view_<id>.html` por ligando. La cámara se orienta automáticamente haci
 bolsillo: calcula el vector del centro de la proteína al centro del ligando y rota la
 escena para mirarlo de frente.
 
-### 4. Capturar los lienzos
+### 5. Capturar los lienzos
 
 Levanta el servidor en segundo plano (sirve las páginas y recibe los PNG por POST, para
 no mover megabytes de base64 por la conversación):
@@ -156,15 +176,17 @@ es el mismo que aparece en el nombre del HTML. La espera no es un capricho: las
 superficies se calculan de forma asíncrona y capturar antes produce imágenes sin
 superficie o a medio dibujar.
 
-### 5. Componer la figura
+### 6. Componer las figuras
 
 ```bash
 python compose_figure.py
 ```
 
-Escribe la figura completa (300 ppp) y una versión individual por ligando.
+Escribe la figura conjunta (300 ppp) y una figura individual por ligando. Las dos se
+entregan siempre: la conjunta sirve para el artículo y las individuales para la
+presentación o el anexo.
 
-### 6. Revisar
+### 7. Revisar
 
 Mira la figura antes de darla por terminada y señala tú mismo los defectos. Los que
 aparecen con más frecuencia: etiquetas de residuo encimadas cuando hay muchos puentes de
@@ -210,7 +232,10 @@ partirla en dos figuras o entregar las individuales.
 | `<ligando>_pose.pdb` | La pose aislada, lista para abrir en cualquier visualizador |
 | `view_<id>.html` | Escena 3D interactiva; se abre en el navegador y se puede rotar |
 | `cap_<id>_A.png`, `cap_<id>_B.png` | Los lienzos capturados |
-| `FIGURA_*.png` | La figura compuesta y las individuales, a 300 ppp |
+| `FIGURA_*.png` | La figura conjunta y las individuales, a 300 ppp |
+| `tabla_resumen.md/.csv/.html` | Una fila por ligando: afinidad, contactos y residuos destacados |
+| `tabla_contactos_<id>.md/.csv/.html` | Todos los contactos de ese ligando |
+| `tabla_contactos_todos.csv` | Los contactos de todos los ligandos juntos |
 
 Los HTML son útiles por sí mismos: permiten al usuario explorar el complejo y elegir otra
 orientación si la automática no le convence.

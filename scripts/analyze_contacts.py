@@ -22,12 +22,14 @@ def main(cfg_path="complex.json"):
     hb_max, hyd_max = cfg["hbond_max"], cfg["hydrophobic_max"]
     cut = max(hb_max, hyd_max)
     highlight = set(cfg["highlight_residues"])
+    site = set(cfg["site_residues"])
 
     rec = read_receptor(cfg["receptor"])
     tree = cKDTree(np.array([a["xyz"] for a in rec]))
     view = write_receptor_view(cfg["receptor"])
 
     out = {"receptor": cfg["receptor"], "receptor_view": view,
+           "site_residues": sorted(site), "site_label": cfg["site_label"],
            "highlight_residues": sorted(highlight),
            "highlight_label": cfg["highlight_label"],
            "title": cfg["title"], "subtitle": cfg["subtitle"],
@@ -69,6 +71,7 @@ def main(cfg_path="complex.json"):
                      n_total=len(contacts),
                      n_hbond=sum(1 for c in contacts if c["kind"] == "H-bond"),
                      n_highlight=sum(1 for c in contacts if c["num"] in highlight),
+                     n_site=(sum(1 for c in contacts if c["num"] in site) if site else None),
                      contacts=contacts)
         out["ligands"].append(entry)
 

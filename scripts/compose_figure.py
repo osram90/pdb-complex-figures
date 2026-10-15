@@ -129,7 +129,10 @@ def main(path="contacts.json"):
                         fill=(30, 38, 48) if j == 0 else (120, 130, 142),
                         font=f_tiny, anchor="ma")
 
-        txt = f"{lig['n_total']} residuos en contacto   ·   {lig['n_hbond']} puentes de hidrógeno"
+        en_sitio = (f" ({lig['n_site']} en {data.get('site_label', 'el sitio')})"
+                    if lig.get("n_site") is not None else "")
+        txt = (f"{lig['n_total']} residuos en contacto{en_sitio}   ·   "
+               f"{lig['n_hbond']} puentes de hidrógeno")
         hl = sorted(c["num"] for c in lig["contacts"]
                     if c["num"] in set(data.get("highlight_residues", [])))
         if hl:
