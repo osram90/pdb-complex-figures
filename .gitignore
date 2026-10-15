@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+# salidas de ejecucion: no deben versionarse
+contacts.json
+complex.json
+receptor_view.pdb
+*_pose.pdb
+view_*.html
+cap_*.png
+FIGURA_*.png

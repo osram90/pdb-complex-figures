@@ -1,0 +1,16 @@
+{
+  "receptor": "proteina.pdb",
+  "title": "Mi proteina - complejos proteina-ligando",
+  "subtitle": "",
+  "highlight_residues": [],
+  "highlight_label": "residuos destacados",
+  "outfile": "FIGURA_complejos.png",
+  "port": 8766,
+  "model": 1,
+  "hbond_max": 3.5,
+  "hydrophobic_max": 4.5,
+  "ligands": [
+    {"name": "Compuesto_A", "pose": "Compuesto_A_out.pdbqt", "color": "#ff2d55", "label": "Compuesto A"},
+    {"name": "Compuesto_B", "pose": "Compuesto_B_out.pdbqt", "color": "#ff9500", "label": "Compuesto B"}
+  ]
+}
